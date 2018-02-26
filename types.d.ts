@@ -9,21 +9,11 @@ export type RESERVED_7 = 7;
 export type RESERVED_8 = 8;
 export type RESERVED_9 = 9;
 
-export type Callbag = (type: START | DATA | END, payload?: any) => void;
+export type Callbag =
+  & ((start: START, talkback: Callbag) => void)
+  & ((deliver: DATA, data: any) => void)
+  & ((terminate: END, error?: any) => void);
 
-export type SourceTalkback =
-& ((request: DATA) => void)
-& ((terminate: END) => void);
+export type Factory = (...args: Array<any>) => Callbag;
 
-export type SinkTalkback =
-& ((start: START, sourceTalkback: SourceTalkback) => void)
-& ((deliver: DATA, data: any) => void)
-& ((terminate: END, error?: any) => void);
-
-export type SourceInitiator = (type: START, payload: SinkTalkback) => void;
-
-export type SinkConnector = (source: SourceInitiator) => SourceInitiator | void;
-
-export type SourceFactory = (...args: any[]) => SourceInitiator;
-
-export type Operator = (...args: any[]) => SinkConnector;
+export type Operator = (...args: Array<any>) => (source: Callbag) => Callbag;
